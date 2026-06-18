@@ -1,9 +1,8 @@
 package com.asdf.todo.service;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.asdf.todo.model.Todo;
+import com.asdf.todo.entity.Todo;
 import com.asdf.todo.repository.TodoInMemoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
