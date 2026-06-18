@@ -1,6 +1,6 @@
 package com.asdf.todo.service;
 
-import com.asdf.todo.model.Todo;
+import com.asdf.todo.entity.Todo;
 import com.asdf.todo.repository.TodoInMemoryRepository;
 import java.util.List;
 import java.util.Optional;
