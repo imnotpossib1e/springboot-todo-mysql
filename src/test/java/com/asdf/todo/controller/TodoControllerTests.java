@@ -1,5 +1,7 @@
 package com.asdf.todo.controller;
 
+import com.asdf.todo.dto.TodoRequestDto;
+import com.asdf.todo.dto.TodoResponseDto;
 import com.asdf.todo.entity.Todo;
 import com.asdf.todo.service.TodoService;
 import org.junit.jupiter.api.Test;
@@ -36,17 +38,15 @@ public class TodoControllerTests {
     @Test
     public void testGetTodoById() throws Exception{
         // 테스트용 데이터 생성
-        Todo todo = new Todo();
-        todo.setId(1L);
-        todo.setTitle("Test Todo");
+        TodoResponseDto todo = new TodoResponseDto(1L, "Test Todo", "Description", false);
 
         // 서비스 Mock 설정
         // 진짜 로직을 실행하지 않고 이 todo 반환
-        given(todoService.findById(1L)).willReturn(Optional.of(todo));
+        given(todoService.findById(1L)).willReturn(todo);
 
         // MockMvc는 실제 서버 없이 가짜 HTTP 요청을 보낸다
         // API 호출 시뮬레이션
-        mockMvc.perform(get("/api/todos/v1/1")
+        mockMvc.perform(get("/api/todos/v2/1")
                 .accept(MediaType.APPLICATION_JSON)) // Json 요청 명시
                 .andExpect(status().isOk()) // 상태 코드 검증 (200 OK)
                 .andExpect(jsonPath("$.id").value(1L)) // 응답 body 검증 (id)
@@ -63,7 +63,7 @@ public class TodoControllerTests {
 
         // 전체 조회 요청 실행
         // 가짜 HTTP 요청
-        mockMvc.perform(get("/api/todos/v1")
+        mockMvc.perform(get("/api/todos/v2")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent()); // 응답 상태 검증
 
@@ -71,10 +71,10 @@ public class TodoControllerTests {
         given(todoService.findAll())
                 .willReturn(
                         Collections.singletonList(
-                                new Todo(1L, "Test Todo", "Description", false)));
+                                new TodoResponseDto(1L, "Test Todo", "Description", false)));
 
         // 전체 조회 요청 실행
-        mockMvc.perform(get("/api/todos/v1")
+        mockMvc.perform(get("/api/todos/v2")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()) // 상태 코드 검증 (200 OK)
                 .andExpect(jsonPath("$[0].id").value(1L)) // 첫 번째 요소($[0]) id(.id) 검증
@@ -86,20 +86,18 @@ public class TodoControllerTests {
     @Test
     public void testCreateTodo() throws Exception{
         // 생성 후 반환될 Todo 준비
-        Todo todo = new Todo();
-        todo.setId(1L);
-        todo.setTitle("New Todo");
+        TodoResponseDto todo = new TodoResponseDto(1L, "New Todo", "Description", false);
 
         // Service Mock 설정
         // 어떤 Todo가 들어와도 저장하면 todo를 반환
-        given(todoService.save(any(Todo.class))).willReturn(todo);
+        given(todoService.save(any(TodoRequestDto.class))).willReturn(todo);
 
         // POST 요청 실행
         // 가짜 HTTP POST 요청
         mockMvc.perform(
-                post("/api/todos/v1")
+                post("/api/todos/v2")
                         .contentType(MediaType.APPLICATION_JSON) // JSON 요청 타입 지정
-                        .content("{\"title\": \"New Todo\"}")) // 요청 body 전달
+                        .content("{\"title\": \"New Todo\", \"description\": " + "\"Description\"}")) // 요청 body 전달
                 .andExpect(status().isCreated()) // 상태 코드 검증 (201 Created)
                 .andExpect(jsonPath("$.id").value(1L)) // 응답 JSON id 검증
                 .andExpect(jsonPath("$.title").value("New Todo")); // 응답 JSON title 검증
@@ -110,27 +108,23 @@ public class TodoControllerTests {
     @Test
     public void testUpdateTodo() throws Exception{
         // 기존 데이터 생성 (수정 전 데이터)
-        Todo existingTodo = new Todo();
-        existingTodo.setId(1L);
-        existingTodo.setTitle("Existing Todo");
+        TodoResponseDto existingTodo = new TodoResponseDto(1L, "Existion Todo", "Description", false);
 
         // 수정 후 데이터 생성
-        Todo updateTodo = new Todo();
-        updateTodo.setId(1L);
-        updateTodo.setTitle("Updated Todo");
+        TodoResponseDto updatedTodo = new TodoResponseDto(1L, "Updated Todo", "Updated Description", true);
 
         // findById Mock 설정
         // Controller가 수정 전 존재 여부 확인할 때 existingTodo 반환
-        given(todoService.findById(1L)).willReturn(Optional.of(existingTodo));
+        given(todoService.findById(1L)).willReturn(existingTodo);
 
         // Update Mock 설정
-        // 어떤 id와 어떤 Todo가 와도 updateTodo qksghks
-        given(todoService.update(anyLong(), any(Todo.class)))
-                .willReturn(updateTodo);
+        // 어떤 id와 어떤 Todo가 와도 updateTodo 반환
+        given(todoService.update(anyLong(), any(TodoRequestDto.class)))
+                .willReturn(updatedTodo);
 
         // PUT 요청 실행
         mockMvc.perform(
-                put("/api/todos/v1/1")
+                put("/api/todos/v2/1")
                         .contentType(MediaType.APPLICATION_JSON) // JSON 타입 지정
                         .content("{\"title\":  \"Updated Todo\"}")) // 수정 요청 body
                 .andExpect(status().isOk()) // 상태 코드 검증 (200 OK)
@@ -144,15 +138,13 @@ public class TodoControllerTests {
     @Test
     public void testDeleteTodo() throws Exception{
         // 삭제 대상 Todo 생성
-        Todo todo = new Todo();
-        todo.setId(1L);
-        todo.setTitle("Test Todo");
+        TodoResponseDto todo = new TodoResponseDto(1L, "Test Todo", "Description", false);
 
         // 존재 여부 Mock 설정 (존재할 때 todo 반환)
-        given(todoService.findById(1L)).willReturn(Optional.of(todo));
+        given(todoService.findById(1L)).willReturn(todo);
 
         // Delete 요청 실행
-        mockMvc.perform(delete("/api/todos/v1/1")
+        mockMvc.perform(delete("/api/todos/v2/1")
                         .accept(MediaType.APPLICATION_JSON)) // JSON 응답 요청
                 .andExpect(status().isNoContent()); // 상태 코드 검증 (204 No Content)
     }
