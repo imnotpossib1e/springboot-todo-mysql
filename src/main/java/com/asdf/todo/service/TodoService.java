@@ -1,7 +1,7 @@
 package com.asdf.todo.service;
 
 import com.asdf.todo.entity.Todo;
-import com.asdf.todo.repository.TodoInMemoryRepository;
+import com.asdf.todo.repository.TodoRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 // Repository를 주입받아서 DB(인메모리)접근을 위임
 @Service
 public class TodoService {
-    private final TodoInMemoryRepository todoRepository;
+    private final TodoRepository todoRepository;
 
     /** 생성자 주입 Spring이 TodoInMemoryRepository를 자동 주입 final로 선언해서 불변성 확보 * */
     @Autowired
-    public TodoService(TodoInMemoryRepository todoRepository) {
+    public TodoService(TodoRepository todoRepository) {
         this.todoRepository = todoRepository;
     }
 
