@@ -3,7 +3,7 @@ package com.asdf.todo.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.asdf.todo.entity.Todo;
-import com.asdf.todo.repository.TodoInMemoryRepository;
+import com.asdf.todo.repository.TodoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class TodoServiceTests {
     @BeforeEach
     void setUp() {
         // Service 직접 생성
-        todoService = new TodoService(new TodoInMemoryRepository());
+        todoService = new TodoService(new TodoRepository());
         // 테스트 데이터 저장 1
         todoService.save(new Todo(null, "Test Todo 1", "Description 1", false));
         // 테스트 데이터 저장 2
