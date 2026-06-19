@@ -1,5 +1,7 @@
 package com.asdf.todo.controller;
 
+import com.asdf.todo.dto.TodoRequestDto;
+import com.asdf.todo.dto.TodoResponseDto;
 import com.asdf.todo.entity.Todo;
 import com.asdf.todo.service.TodoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,87 +23,87 @@ import org.springframework.web.bind.annotation.RestController;
 // REST 컨트롤러 빈 선언
 // HTTP 메소드의 공통된 URL 지정
 @RestController
-@RequestMapping("/api/todos/v1")
+@RequestMapping("/api/todos/v2")
 public class TodoController {
-
-    // 컨트롤러가 서비스 레이어의 메서드를 호출할 수 있도록 TodoService 빈을 컨트롤러 클래스에 주입
-    @Autowired private TodoService todoService;
+    private TodoService todoService;
 
     // 모든 항목 조회 API
+    // Todo를 가져와서 있으면 200, 없으면 204 반환
     @GetMapping
     @Operation(summary = "전체 작업 조회", description = "전체 작업 조회")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "성공"),
         @ApiResponse(responseCode = "204", description = "내용 없음")
     })
-    public ResponseEntity<List<Todo>> getAllTodos() {
-        List<Todo> todos = todoService.findAll();
-        if (todos == null || todos.isEmpty()) {
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<List<TodoResponseDto>> getAllTodos() { // 여러개(List) 응답
+        List<TodoResponseDto> todos = todoService.findAll(); // Service 호출
+
+        // 빈 목록 체크
+        if (todos.isEmpty()) {
+            return ResponseEntity.noContent().build(); // body 없음 (204 반환)
         }
-        return ResponseEntity.ok(todos);
+        return ResponseEntity.ok(todos); // 200 OK
     }
 
     // 특정 ID Todo 항목 조회
+    // URL로 받은 id를 이용해 Todo 조회, 있으면 200, 없으면 404 응답
     @GetMapping("/{id}")
     @Operation(summary = "작업 조회", description = "ID로 작업 조회")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "성공"),
         @ApiResponse(responseCode = "404", description = "작업 없음")
     })
-    public ResponseEntity<Todo> getTodoById(@PathVariable Long id) {
-        Optional<Todo> todo = todoService.findById(id);
+    public ResponseEntity<TodoResponseDto> getTodoById(@PathVariable Long id) { // 응답 데이터와 상태 코드 같이 반환
+        TodoResponseDto todo = todoService.findById(id); // Service 호출
 
-        if (todo.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        if (todo == null) {
+            return ResponseEntity.notFound().build(); // body 없음 (404 not found)
         }
 
-        return ResponseEntity.ok(todo.get());
+        return ResponseEntity.ok(todo); // 200 OK
     }
 
     // Todo 항목 생성
-    // 생성이 성공하면 201 상태 코드를 명시적으로 설정하고 생성된 항목을 본문에 포함해 반환
+    // 클라이언트가 보낸 Todo데이터를 받아 DB에 저장, 생성된 결과 201 상태로 반환
     @PostMapping
     @Operation(summary = "작업 생성", description = "새로운 작업 생성")
     @ApiResponses({@ApiResponse(responseCode = "201", description = "생성됨")})
-    public ResponseEntity<Todo> createTodo(@RequestBody Todo todo) {
-        return ResponseEntity.status(201).body(todoService.save(todo));
+    public ResponseEntity<TodoResponseDto> createTodo(@RequestBody TodoRequestDto todo) { // @RequestBody: 요청 body(JSON)을 Java 객체로 변환
+        return ResponseEntity.status(201).body(todoService.save(todo)); // 서비스 호출하여 응답 생성
     }
 
     // 기존 Todo 항목 수정
-    // 해당하는 Todo 항목이 존재하지 않으면 HTTP 404 응답 반환
+    // URL의 id에 해당하는 Todo가 존재하면 수정하고, 없으면 404 반환
     @PutMapping("/{id}")
     @Operation(summary = "작업 수정", description = "ID로 작업 수정")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "성공"),
         @ApiResponse(responseCode = "404", description = "작업 없음")
     })
-    public ResponseEntity<Todo> updateTodo(@PathVariable Long id, @RequestBody Todo todo) {
-        Optional<Todo> existingTodo = todoService.findById(id);
-        if (existingTodo.isEmpty()) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<TodoResponseDto> updateTodo(@PathVariable Long id, @RequestBody TodoRequestDto todo) {
+        TodoResponseDto existingTodo = todoService.findById(id); // 기존 데이터 조회
+        if (existingTodo == null) {
+            return ResponseEntity.notFound().build(); // 없으면 404
         }
-
-        return ResponseEntity.ok(todoService.update(id, todo));
+        return ResponseEntity.ok(todoService.update(id, todo)); // 수정 실행
     }
 
     // 특정 ID의 Todo 항목 삭제
-    // 항목이 존재하면 delete 메서드 호출하여 항목 삭제하고 204 응답 반환
-    // 황목이 존재하지 않으면 404 코드 반환
+    // id로 Todo를 찾아 존재하면 삭제하고 204 반환, 없으면 404 반환
     @DeleteMapping("/{id}")
     @Operation(summary = "작업 삭제", description = "ID로 작업 삭제")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "내용 없음"),
         @ApiResponse(responseCode = "404", description = "작업 없음")
     })
-    public ResponseEntity<Todo> deleteTodo(@PathVariable Long id) {
-        Optional<Todo> todo = todoService.findById(id);
+    public ResponseEntity<Void> deleteTodo(@PathVariable Long id) {
+        TodoResponseDto todo = todoService.findById(id); // 기존 데이터 조회
 
-        if (todo.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        if (todo == null) {
+            return ResponseEntity.notFound().build(); // 없으면 404
         }
 
-        todoService.delete(id);
-        return ResponseEntity.noContent().build();
+        todoService.delete(id); // 삭제 실행
+        return ResponseEntity.noContent().build(); // 성공 응답
     }
 }
