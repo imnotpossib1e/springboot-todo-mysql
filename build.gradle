@@ -31,6 +31,8 @@ dependencies {
 
 	// MySQL JDBC 드라이버 의존성
 	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	testRuntimeOnly 'com.mysql:mysql-connector-j'
 
 	// Lombok 라이브러리를 컴파일 시에만 사용하도록 설정
 	// Getter, Setter 등을 자동으로 생성
