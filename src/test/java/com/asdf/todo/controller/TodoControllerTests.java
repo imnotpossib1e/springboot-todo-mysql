@@ -126,7 +126,7 @@ public class TodoControllerTests {
         mockMvc.perform(
                 put("/api/todos/v2/1")
                         .contentType(MediaType.APPLICATION_JSON) // JSON 타입 지정
-                        .content("{\"title\":  \"Updated Todo\"}")) // 수정 요청 body
+                        .content("{\"title\":  \"Updated Todo\", \"description\": \"Updated" + "Description\"}")) // 수정 요청 body
                 .andExpect(status().isOk()) // 상태 코드 검증 (200 OK)
                 .andExpect(jsonPath("$.id").value(1L)) // id 검증
                 .andExpect(jsonPath("$.title").value("Updated Todo")); // title 검증

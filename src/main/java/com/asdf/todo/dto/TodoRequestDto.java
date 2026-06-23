@@ -10,9 +10,10 @@ import lombok.*;
 @NoArgsConstructor
 public class TodoRequestDto {
     // @NotBlank는 API 요청 검증이 가능하다.
-    @NotBlank
+    @NonNull
     private String title;
-    @NotBlank private String description;
+    @NonNull private String description;
+    @Builder.Default
     private boolean completed = false;
 
     // 생성자 1
