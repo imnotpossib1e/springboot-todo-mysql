@@ -24,20 +24,20 @@ import java.util.List;
 @SpringBootTest
 public class TodoServiceTests {
 
-    @Container
-    public static MySQLContainer<?> mySQLContainer =
-            new MySQLContainer<>("mysql:8.0")
-                    .withDatabaseName("testdb")
-                    .withUsername("test")
-                    .withPassword("test");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry){
-        registry.add("spring.datasource.url", mySQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mySQLContainer::getUsername);
-        registry.add("spring.datasource.password", mySQLContainer::getPassword);
-        registry.add("spring.datasource.driver-class-name", mySQLContainer::getDriverClassName);
-    }
+//    @Container
+//    public static MySQLContainer<?> mySQLContainer =
+//            new MySQLContainer<>("mysql:8.0")
+//                    .withDatabaseName("testdb")
+//                    .withUsername("test")
+//                    .withPassword("test");
+//
+//    @DynamicPropertySource
+//    static void configureProperties(DynamicPropertyRegistry registry){
+//        registry.add("spring.datasource.url", mySQLContainer::getJdbcUrl);
+//        registry.add("spring.datasource.username", mySQLContainer::getUsername);
+//        registry.add("spring.datasource.password", mySQLContainer::getPassword);
+//        registry.add("spring.datasource.driver-class-name", mySQLContainer::getDriverClassName);
+//    }
 
     // Spring이 TodoService를 자동 주입
     @Autowired private TodoService todoService;
